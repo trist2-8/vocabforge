@@ -1,0 +1,351 @@
+:root{
+  --bg:#0b1220;
+  --card:#111b2e;
+  --muted:#7b8bb3;
+  --text:#e8eeff;
+  --accent:#2dd4bf;
+  --accent2:#60a5fa;
+  --danger:#fb7185;
+  --border:rgba(255,255,255,.08);
+}
+
+*{box-sizing:border-box;font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;}
+body{margin:0;background:var(--bg);color:var(--text);}
+
+/* IMPORTANT:
+   - width:360px làm popup đẹp nhưng dashboard (tab) sẽ bị bó
+   - ta để width:100%, còn popup nhỏ thì media query về 360
+*/
+.container{padding:14px; width:100%; position:relative; z-index:2;}
+@media (max-width: 420px){
+  .container{ width:360px; }
+}
+
+.row{display:flex;gap:10px;align-items:center;}
+.space{justify-content:space-between;}
+
+.card{
+  background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:12px;
+}
+
+h1,h2{margin:0 0 10px 0; font-size:16px;}
+.small{font-size:12px;color:var(--muted);}
+hr{border:none;border-top:1px solid var(--border); margin:12px 0;}
+
+input, textarea{
+  width:100%;
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:12px;
+  padding:10px 12px;
+  outline:none;
+}
+textarea{min-height:66px; resize:vertical;}
+
+.btn{
+  background:rgba(45,212,191,.12);
+  border:1px solid rgba(45,212,191,.35);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:.15s transform;
+}
+.btn:hover{transform: translateY(-1px);}
+.btn.secondary{
+  background:rgba(96,165,250,.10);
+  border-color:rgba(96,165,250,.30);
+}
+.btn.danger{
+  background:rgba(251,113,133,.10);
+  border-color:rgba(251,113,133,.30);
+}
+.btn.full{width:100%;}
+
+.pill{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  color:var(--muted);
+}
+
+.progress{
+  height:10px;
+  background:rgba(255,255,255,.06);
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid var(--border);
+}
+.progress > div{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg, var(--accent), var(--accent2));
+}
+
+.list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.item{
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:rgba(255,255,255,.02);
+}
+.item .top{display:flex;justify-content:space-between;gap:10px;}
+.item .word{font-weight:700;}
+.item .meta{font-size:12px;color:var(--muted);}
+
+.link{
+  color:var(--accent2);
+  text-decoration:none;
+}
+.link:hover{text-decoration:underline;}
+
+
+/* ===== Modal (Edit) - clear text, not blurry ===== */
+.vfOverlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.60);
+  z-index: 999999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 14px;
+}
+
+.vfModal{
+  width: 560px;
+  max-width: 100%;
+  background: #0f1930;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  box-shadow: 0 22px 80px rgba(0,0,0,.60);
+  color: var(--text);
+}
+
+.vfModalHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 12px 12px;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  font-weight: 900;
+}
+
+.vfModalBody{
+  padding: 12px;
+}
+
+.vfModal input, .vfModal textarea{
+  width:100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.07);
+  color: var(--text);
+  outline:none;
+}
+
+.vfModal input::placeholder, .vfModal textarea::placeholder{
+  color: rgba(232,238,255,.55);
+}
+
+.btn.danger{
+  border-color: rgba(251,113,133,.35);
+  background: rgba(251,113,133,.10);
+}
+
+/* ===== Tag chips ===== */
+.chipRow{ display:flex; gap:8px; flex-wrap:wrap; }
+.chip{
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.03);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+.chip:hover{ transform: translateY(-1px); }
+.chip.active{
+  border-color: rgba(45,212,191,.35);
+  background: rgba(45,212,191,.14);
+}
+
+/* Make <select> text visible on Windows/Chrome */
+select{
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+}
+select option{
+  color: #0b1220;
+  background: #e8f0ff;
+}
+
+/* Select placeholder styling */
+.selectLike{ 
+  width:100%;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.03);
+  color: var(--muted);
+  appearance: none;
+}
+.selectLike.hasValue{ color: var(--text); }
+
+/* ===== Select fixes (always-visible text + placeholder like inputs) ===== */
+select.selectLike, select.compactSelect{
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, rgba(232,238,255,.75) 50%),
+                    linear-gradient(135deg, rgba(232,238,255,.75) 50%, transparent 50%);
+  background-position: calc(100% - 14px) calc(50% - 3px), calc(100% - 9px) calc(50% - 3px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 28px;
+}
+
+/* compact selects in Session row */
+.compactSelect{
+  padding: 6px 28px 6px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+/* dropdown list readability on Windows */
+select.selectLike option,
+select.compactSelect option{
+  color: #0b1220 !important;
+  background: #ffffff !important;
+}
+
+/* placeholder style for selects: use .hasValue when real value selected */
+select.selectLike:not(.hasValue){
+  color: rgba(232,238,255,.55) !important;
+}
+select.selectLike.hasValue{ color: var(--text) !important; }
+
+
+/* =========================================================
+   ✅ FIX CHÍNH: FX canvas/layer PHẢI fixed để KHÔNG đẩy layout
+   ========================================================= */
+.vfFxCanvas{
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+.vfAnimalLayer{
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.vfAnimal{
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  opacity: .95;
+  transform: translate(-50%, -50%) scale(1);
+  animation: vfPop 1.3s ease forwards;
+}
+
+@keyframes vfPop{
+  0%{ transform: translate(-50%,-50%) scale(.6); opacity:0; }
+  10%{ opacity:1; }
+  100%{ transform: translate(-50%,-50%) scale(1.15); opacity:0; }
+}
+
+
+/* ===== Streak flames (Zalo-like tiers) ===== */
+:root{
+  --vf-flame-yellow-outer:#ffb000;
+  --vf-flame-yellow-core:#fff0a6;
+
+  --vf-flame-orange-outer:#ff7a00;
+  --vf-flame-orange-core:#ffd34d;
+
+  --vf-flame-red-outer:#ff3b30;
+  --vf-flame-red-core:#ffb199;
+
+  --vf-flame-purple-outer:#b100ff;
+  --vf-flame-purple-core:#ff6bd6;
+
+  --vf-flame-locked-outer:#9aa5bf;
+  --vf-flame-locked-core:#c7cfde;
+}
+
+/* small flame badge used in pill */
+.vfFlameBadge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.vfFlameSvg{
+  width:18px;
+  height:18px;
+  display:inline-block;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.25));
+}
+.vfFlameAnim{
+  animation: vfFlameFlicker 1.15s ease-in-out infinite;
+  transform-origin: 50% 85%;
+}
+@keyframes vfFlameFlicker{
+  0%,100%{ transform: translateY(0) scale(1) rotate(-1deg); filter: drop-shadow(0 2px 6px rgba(0,0,0,.25)); }
+  45%{ transform: translateY(-0.7px) scale(1.05) rotate(1deg); filter: drop-shadow(0 3px 10px rgba(255,138,0,.30)); }
+  70%{ transform: translateY(-0.2px) scale(1.02) rotate(0deg); }
+}
+
+/* streak tier row */
+.vfStreakBar{
+  margin-top:8px;
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+}
+.vfStreakMilestone{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  min-width:38px;
+}
+.vfStreakMilestone .lbl{
+  font-size:11px;
+  color:var(--muted);
+}
+.vfStreakMilestone.achieved .lbl{
+  color:rgba(232,238,255,.85);
+}
+.vfStreakMilestone.locked .lbl{
+  opacity:.7;
+}
+.vfStreakMilestone .vfFlameSvg{
+  width:20px;
+  height:20px;
+}
+.vfStreakMilestone.locked .vfFlameSvg{
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.18));
+  opacity:.70;
+}
+

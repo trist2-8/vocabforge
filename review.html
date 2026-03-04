@@ -1,0 +1,276 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="stylesheet" href="styles.css" />
+  <title>Review • VocabForge</title>
+
+  <style>
+    .page { max-width: 860px; width:100%; margin: 0 auto; padding: 12px 14px 20px; }
+    .hero { display:flex; gap:12px; align-items:flex-start; justify-content:space-between; }
+    .title { font-size:18px; font-weight:900; margin:0; }
+    .sub { font-size:12px; color: var(--muted); margin-top:4px; }
+
+    .grid { display:grid; grid-template-columns: 1fr; gap:12px; margin-top:12px; }
+    @media (min-width: 920px) { .grid { grid-template-columns: 1.2fr .8fr; } }
+
+    .bigWord { font-size: 34px; font-weight: 950; line-height: 1.1; letter-spacing:.2px; }
+    .meaning { font-size: 18px; font-weight: 800; }
+    .note { white-space: pre-wrap; font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+    .kbd { font-size: 11px; padding: 4px 8px; border-radius: 999px; border:1px solid var(--border); color: var(--muted); background: rgba(255,255,255,.03); }
+    .rateRow { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    .rateRow .btn { flex: 1 1 120px; }
+
+    .mini { font-size:12px; color: var(--muted); }
+    .infoRow { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+
+    .queueList { max-height: 380px; overflow:auto; padding-right: 4px; }
+    .queueList::-webkit-scrollbar { width: 10px; }
+    .queueList::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 999px; border: 2px solid rgba(0,0,0,0); background-clip: padding-box; }
+
+    .progressWrap { margin-top: 10px; }
+    .progressText { display:flex; justify-content:space-between; margin-top:8px; font-size:12px; color: var(--muted); }
+
+    .modeRow{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .modeBtn{
+      padding:8px 10px;
+      border-radius: 999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      cursor:pointer;
+      font-size:12px;
+      font-weight:700;
+    }
+    .modeBtn.active{
+      border-color: rgba(96,165,250,.35);
+      background: rgba(96,165,250,.14);
+    }
+
+    .recallBox{ margin-top:10px; }
+    .recallInput{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      outline:none;
+      font-size:14px;
+    }
+    .checkRow{ display:flex; gap:8px; margin-top:8px; align-items:center; flex-wrap:wrap; }
+    .badge{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+    }
+    .badge.ok{ border-color: rgba(45,212,191,.35); background: rgba(45,212,191,.12); color: var(--text); }
+    .badge.bad{ border-color: rgba(251,113,133,.35); background: rgba(251,113,133,.10); color: var(--text); }
+  
+    /* Reveal animation */
+    #meaningBox{
+      overflow:hidden;
+      max-height:0;
+      opacity:0;
+      transform: translateY(6px);
+      transition: max-height .28s ease, opacity .18s ease, transform .18s ease;
+    }
+    #meaningBox.show{
+      max-height: 900px;
+      opacity:1;
+      transform: translateY(0);
+    }
+    #revealBtn{ transition: transform .12s ease, filter .12s ease; }
+    #revealBtn:hover{ transform: translateY(-1px); filter: brightness(1.06); }
+
+    /* Confetti */
+    #confetti{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:999999; }
+    .cf{
+      position:absolute; top:-10px;
+      width:8px; height:14px;
+      opacity:.95;
+      transform: rotate(0deg);
+      animation: cfFall var(--d) linear forwards, cfSpin .7s linear infinite;
+      border-radius: 3px;
+    }
+    @keyframes cfFall{
+      to{ transform: translateY(110vh) rotate(180deg); opacity: .9; }
+    }
+    @keyframes cfSpin{
+      to{ rotate: 360deg; }
+    }
+</style>
+</head>
+
+<body>
+  <div class="page">
+    <div class="hero">
+      <div>
+        <h1 class="title">Review</h1>
+        <div class="sub" id="info">Loading...</div>
+
+        <div class="infoRow">
+          <span class="kbd">Space: Reveal</span>
+          <span class="kbd">Enter: Check (Recall)</span>
+          <span class="kbd">1 Again</span>
+          <span class="kbd">2 Hard</span>
+          <span class="kbd">3 Good</span>
+          <span class="kbd">4 Easy</span>
+        </div>
+
+        <div class="infoRow modeRow">
+          <span class="mini">Mode:</span>
+          <button class="modeBtn active" id="modeRec">Recognition</button>
+          <button class="modeBtn" id="modeRecall">Recall</button>
+          <span class="kbd">Esc: Close</span>
+        </div>
+
+        <div class="infoRow" style="gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;">
+          <span class="mini">Tag filter:</span>
+          <div id="tagChips" class="chipRow"></div>
+        </div>
+      </div>
+
+      <div class="row" style="gap:8px; align-items:center;">
+        <button class="btn secondary" id="ttsBtn" title="Speak (word)">🔊</button>
+        <button class="btn" id="skipBtn" title="Skip">Skip</button>
+        <a class="link" href="#" id="openDash">Dashboard</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: main card -->
+      <div class="card" id="card">
+        <div class="small" id="frontLabel">Word</div>
+        <div style="height:8px;"></div>
+        <div class="row space" style="align-items:flex-start;">
+          <div class="bigWord" id="wordText">—</div>
+          <button class="btn ghost" id="editBtn" style="padding:8px 10px;">Edit</button>
+        </div>
+
+        <div class="progressWrap">
+          <div class="small">Session progress</div>
+          <div style="height:8px;"></div>
+          <div class="progress"><div id="bar"></div></div>
+          <div class="progressText">
+            <span id="leftText">—</span>
+            <span class="mini" id="streakText">🔥 —</span>
+            <!-- XP removed to reduce bugs; keep UI minimal -->
+            <span class="mini" id="comboText">⚡ 0</span>
+          </div>
+        </div>
+
+        <!-- Recognition reveal -->
+        <div style="height:12px;"></div>
+        <button class="btn full" id="revealBtn">Reveal meaning</button>
+
+        <!-- Recall input -->
+        <div class="recallBox" id="recallBox" style="display:none;">
+          <div class="small">Type the English word</div>
+          <div style="height:8px;"></div>
+          <input class="recallInput" id="recallInput" placeholder="Type here..." autocomplete="off" />
+          <div class="checkRow">
+            <button class="btn secondary" id="checkBtn">Check</button>
+            <span class="badge" id="checkBadge">Not checked</span>
+          </div>
+          <div class="small" style="margin-top:8px;">
+            Hint: Bạn có thể bấm <b>Space</b> để reveal đáp án nếu bí.
+          </div>
+        </div>
+
+        <!-- Meaning box -->
+        <div id="meaningBox" style="display:none; margin-top:12px;">
+          <hr/>
+          <div class="small">Meaning (VI)</div>
+          <div style="height:6px;"></div>
+          <div class="meaning" id="meaningText">—</div>
+
+          <div class="note" id="noteText" style="display:none;"></div>
+
+          <div style="height:12px;"></div>
+          <div class="small">Next review</div>
+          <div style="height:8px;"></div>
+          <div class="row space">
+            <div class="pill" id="nextReviewText">—</div>
+            <div class="pill" id="intervalText">—</div>
+          </div>
+
+          <div style="height:12px;"></div>
+          <div class="small">Rate</div>
+          <div class="rateRow" id="rateRow">
+            <button class="btn danger" data-rate="0">Again <span class="mini">(1)</span></button>
+            <button class="btn" data-rate="1">Hard <span class="mini">(2)</span></button>
+            <button class="btn secondary" data-rate="2">Good <span class="mini">(3)</span></button>
+            <button class="btn secondary" data-rate="3">Easy <span class="mini">(4)</span></button>
+          </div>
+
+          <div class="small" style="margin-top:10px;">
+            Learning steps (từ mới): 10 phút → 1 ngày → 3 ngày → rồi mới tăng theo SRS.
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: queue -->
+      <div class="card">
+        <div class="row space">
+          <div>
+            <div class="small">Queue (due now)</div>
+            <div style="font-size:18px;font-weight:900;" id="queueCount">0</div>
+          </div>
+          <div class="pill" id="queuePill">0</div>
+        </div>
+
+        <div style="height:10px;"></div>
+        <div class="queueList list" id="queueList"></div>
+      </div>
+    </div>
+  </div>
+  <script src="vf_logger.js"></script>
+  <script src="vf_rpc.js"></script>
+  <script src="vf_tts.js"></script>
+  <script src="vf_ui.js"></script>
+  <script src="review.js"></script>
+
+  <!-- Edit Modal -->
+  <div id="vfEditOverlay" class="vfOverlay" style="display:none;">
+    <div class="vfModal">
+      <div class="vfModalHead">
+        <div>Edit word</div>
+        <button id="vfEditClose" class="btn ghost" style="padding:8px 10px;">✕</button>
+      </div>
+      <div class="vfModalBody">
+        <div class="small">Word</div>
+        <input id="vfEditWord" />
+
+        <div style="height:8px;"></div>
+        <div class="small">Meaning (VI)</div>
+        <textarea id="vfEditMeaning" rows="3"></textarea>
+
+        <div style="height:8px;"></div>
+        <div class="small">Example</div>
+        <textarea id="vfEditExample" rows="3"></textarea>
+
+        <div style="height:8px;"></div>
+        <div class="small">Tags (comma)</div>
+        <input id="vfEditTags" placeholder="TOEIC, Programming..." />
+
+        <div style="height:8px;"></div>
+        <div class="small">Note</div>
+        <textarea id="vfEditNote" rows="3"></textarea>
+
+        <div class="row" style="gap:8px;margin-top:10px;">
+          <button id="vfEditSave" class="btn secondary" style="flex:1;">Save</button>
+          <button id="vfEditDelete" class="btn danger" style="flex:1;">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div id="confetti"></div>
+</body>
+</html>

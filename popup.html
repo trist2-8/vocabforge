@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="stylesheet" href="styles.css" />
+  <title>VocabForge</title>
+  <style>
+    .container{ width: 360px; }
+    .hdr{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+    .brand{font-size:16px; font-weight:950; margin:0;}
+    .sub{font-size:12px; color:var(--muted); margin-top:4px;}
+
+    .card.tight{padding:12px;}
+    .topRow{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+    .dueBox{display:flex; flex-direction:column; gap:2px;}
+    .dueNum{font-size:26px; font-weight:950; line-height:1;}
+    .dueLabel{font-size:12px; color:var(--muted);}
+
+    .nextRow{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;}
+    .chip{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      color:var(--muted);
+      background: rgba(255,255,255,.03);
+      max-width: 100%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .btn.full{padding:12px 12px; border-radius:14px;}
+    .footerRow{display:flex; justify-content:space-between; align-items:center; margin-top:10px;}
+  </style>
+</head>
+<body>
+
+  <!-- ✅ ADD: FX layers (fixed by styles.css, won't push layout) -->
+  <canvas id="vfFxCanvas" class="vfFxCanvas"></canvas>
+  <div id="vfAnimalLayer" class="vfAnimalLayer"></div>
+
+  <div class="container">
+    <div class="hdr">
+      <div>
+        <h1 class="brand">VocabForge</h1>
+        <div class="sub" id="subtitle">Loading...</div>
+      </div>
+      <div class="pill" id="streakPill">🔥 0</div>
+    </div>
+
+    <div id="streakBar" class="vfStreakBar" aria-label="Streak milestones"></div>
+
+    <div style="height:10px;"></div>
+
+    <div class="card tight">
+      <div class="topRow">
+        <div class="dueBox">
+          <div class="dueLabel">Due now</div>
+          <div class="dueNum" id="dueCount">0</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="dueLabel">Next review</div>
+          <div class="chip" id="nextDueAbs">—</div>
+        </div>
+      </div>
+
+      <div class="nextRow">
+        <div class="chip" id="nextDueRel">—</div>
+        <div class="chip" id="totalWords">0 words</div>
+      </div>
+
+      <div style="height:10px;"></div>
+
+      <div class="row" style="gap:8px; align-items:center;">
+        <div class="pill" style="flex:1; display:flex; gap:8px; align-items:center; justify-content:space-between;">
+          <span class="mini">Session</span>
+          <select id="sessionSize" class="selectLike compactSelect hasValue" style="max-width:120px;">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+          </select>
+          <select id="queueMode" class="selectLike compactSelect hasValue" style="max-width:140px;">
+            <option value="smart" selected>Smart</option>
+            <option value="due">Due only</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="height:10px;"></div>
+
+      <div class="row" style="gap:8px;">
+        <button class="btn secondary full" id="reviewBtn" style="flex:1;">Start Review</button>
+        <button class="btn full" id="startSessionBtn" style="flex:0 0 110px;">Start session</button>
+      </div>
+
+      <div class="footerRow">
+        <a class="link" href="#" id="openDashboard">Open dashboard</a>
+        <div class="small" id="todayHint">Tip: highlight → Alt to save</div>
+      </div>
+    </div>
+
+    <div style="height:10px;"></div>
+
+    <div class="card tight">
+      <div class="row space" style="align-items:center;">
+        <div class="small">Quick add</div>
+        <label class="row" style="gap:8px; align-items:center;">
+          <input type="checkbox" id="autoTranslate" checked />
+          <span class="mini">Auto translate</span>
+        </label>
+      </div>
+
+      <div class="mini" style="color:var(--muted); margin-top:4px;">
+        Tip: ↑/↓ để chuyển ô • Add xong tự quay lại Word
+      </div>
+
+      <div style="height:8px;"></div>
+
+      <div class="row" style="gap:8px; align-items:center;">
+        <input id="word" class="nav-field" placeholder="Word (English)" autocomplete="off" />
+        <button class="btn ghost" id="swapFocusBtn" title="Swap focus (Word ↔ Meaning)"
+          style="padding:10px 12px; border-radius:12px; min-width:44px;">↕</button>
+      </div>
+
+      <div style="height:8px;"></div>
+
+      <div class="row" style="gap:8px; align-items:center;">
+        <select id="posSelect" class="nav-field selectLike" data-placeholder="(auto) Part of speech">
+          <option value="" selected>(auto) Part of speech</option>
+          <option value="noun">noun</option>
+          <option value="verb">verb</option>
+          <option value="adjective">adjective</option>
+          <option value="adverb">adverb</option>
+          <option value="phrase">phrase</option>
+          <option value="other">other</option>
+        </select>
+        <button class="btn ghost" id="clearPosBtn" title="Clear POS"
+          style="padding:10px 12px; border-radius:12px; min-width:44px;">✕</button>
+      </div>
+
+      <div style="height:8px;"></div>
+
+      <div class="row" style="gap:8px; align-items:center;">
+        <input id="meaning" class="nav-field" placeholder="Meaning (Vietnamese)" autocomplete="off" />
+        <button class="btn ghost" id="translateBtn" title="Translate + detect POS"
+          style="padding:10px 12px; border-radius:12px; min-width:44px;">✨</button>
+      </div>
+
+      <div style="height:10px;"></div>
+      <button class="btn full" id="addBtn">Add</button>
+      <div class="mini" id="qaMsg" style="margin-top:8px; color:var(--muted); min-height:16px;"></div>
+    </div>
+    <script src="vf_logger.js"></script>
+    <script src="vf_rpc.js"></script>
+    <script src="vf_tts.js"></script>
+    <script src="vf_ui.js"></script>
+    <script src="popup.js"></script>
+  </div>
+</body>
+</html>
